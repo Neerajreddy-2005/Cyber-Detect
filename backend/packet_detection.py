@@ -11,6 +11,8 @@ import os
 import random
 import time
 from datetime import datetime
+from flask import Flask, jsonify
+from flask_cors import CORS
 
 # ----------------- Load Trained Components -----------------
 model = joblib.load("nids_xgboost_model3.pkl")
@@ -24,6 +26,15 @@ logging.basicConfig(
 )
 
 print("🚨 Real-time Network Intrusion Detection Started...")
+
+# ----------------- Flask App Setup -----------------
+app = Flask(__name__)
+CORS(app)
+
+# Global variables for storing recent data
+recent_packets = []
+normal_count = 0
+intrusion_count = 0
 
 # ----------------- WebSocket Connections -----------------
 connected_clients = set()
@@ -42,7 +53,7 @@ async def broadcast(message):
         )
 
 async def websocket_server():
-    port = int(os.environ.get('PORT', 8765))
+    port = int(os.environ.get('PORT', 10000))  # Use Render's standard port
     host = '0.0.0.0'  # Allow external connections for cloud
     async with websockets.serve(register, host, port):
         await asyncio.Future()  # run forever
@@ -206,6 +217,17 @@ def simulate_packet_analysis():
             with open("nids_logs.json", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
             
+            # Store data for API
+            global recent_packets, normal_count, intrusion_count
+            recent_packets.append(log_entry)
+            if len(recent_packets) > 100:  # Keep only last 100 packets
+                recent_packets.pop(0)
+            
+            if prediction == 0:
+                normal_count += 1
+            else:
+                intrusion_count += 1
+            
             # Broadcast to WebSocket clients
             asyncio.run(broadcast(json.dumps(log_entry)))
             logging.info(f"Simulated Prediction: {label}")
@@ -234,10 +256,41 @@ def start_sniffing():
             logging.info("Falling back to simulated data...")
             simulate_packet_analysis()
 
+# ----------------- Flask Routes -----------------
+@app.route('/')
+def home():
+    return jsonify({
+        "message": "Cyber-Detect Backend API",
+        "status": "running",
+        "timestamp": datetime.now().isoformat()
+    })
+
+@app.route('/api/packets')
+def get_packets():
+    return jsonify({
+        "packets": recent_packets[-50:],  # Last 50 packets
+        "normal_count": normal_count,
+        "intrusion_count": intrusion_count,
+        "total_count": normal_count + intrusion_count
+    })
+
+@app.route('/health')
+def health():
+    return jsonify({
+        "status": "healthy",
+        "model_loaded": model is not None,
+        "scaler_loaded": scaler is not None
+    })
+
 if __name__ == "__main__":
     # Start WebSocket server in a separate thread
-    ws_thread = threading.Thread(target=start_websocket)
+    ws_thread = threading.Thread(target=start_websocket, daemon=True)
     ws_thread.start()
     
-    # Start packet sniffing in the main thread
-    start_sniffing()
+    # Start packet analysis in a separate thread
+    packet_thread = threading.Thread(target=start_sniffing, daemon=True)
+    packet_thread.start()
+    
+    # Start Flask app on the main thread
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host='0.0.0.0', port=port, debug=False)

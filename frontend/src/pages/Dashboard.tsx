@@ -34,7 +34,7 @@ const Dashboard = () => {
   const [intrusionPackets, setIntrusionPackets] = useState(0);
   const [trafficData, setTrafficData] = useState<Array<{timestamp: string, normal: number, intrusion: number}>>([]);
   const [protocolData, setProtocolData] = useState<Array<{name: string, value: number}>>([]);
-  const ws = useRef<WebSocket | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
 
   // Function to handle showing more/less logs
   const toggleShowAllLogs = () => {
@@ -42,61 +42,84 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    // Connect to WebSocket
-    const wsUrl = import.meta.env.VITE_BACKEND_URL || 'ws://localhost:8765';
-    ws.current = new WebSocket(wsUrl);
+    // Poll data from backend API
+    const apiUrl = 'https://cyber-detect.onrender.com/api/packets';
+    console.log('Connecting to API:', apiUrl);
     
-    ws.current.onmessage = (event) => {
-      const packet: PacketLog = JSON.parse(event.data);
-      
-      // Update packet logs - keep only the latest 100 logs in memory
-      setPacketLogs(prev => {
-        const newLogs = [packet, ...prev];
-        return newLogs.slice(0, 100);
-      });
-      
-      // Update counters
-      if (packet.prediction === 0) {
-        setNormalPackets(prev => prev + 1);
-      } else {
-        setIntrusionPackets(prev => prev + 1);
-      }
-      
-      // Update traffic data
-      const now = new Date().toLocaleTimeString();
-      setTrafficData(prev => {
-        const newData = [...prev];
-        if (newData.length > 0 && newData[0].timestamp === now) {
-          if (packet.prediction === 0) {
-            newData[0].normal += 1;
-          } else {
-            newData[0].intrusion += 1;
+    const fetchData = async () => {
+      try {
+        const response = await fetch(apiUrl);
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Update counters
+          setNormalPackets(data.normal_count);
+          setIntrusionPackets(data.intrusion_count);
+          
+          // Update packet logs
+          if (data.packets && data.packets.length > 0) {
+            setPacketLogs(data.packets.slice(0, 100));
+            
+            // Update traffic data
+            const now = new Date().toLocaleTimeString();
+            setTrafficData(prev => {
+              const newData = [...prev];
+              const normalCount = data.packets.filter((p: PacketLog) => p.prediction === 0).length;
+              const intrusionCount = data.packets.filter((p: PacketLog) => p.prediction === 1).length;
+              
+              if (newData.length > 0 && newData[0].timestamp === now) {
+                newData[0].normal = normalCount;
+                newData[0].intrusion = intrusionCount;
+              } else {
+                newData.unshift({
+                  timestamp: now,
+                  normal: normalCount,
+                  intrusion: intrusionCount
+                });
+              }
+              return newData.slice(0, 10);
+            });
+            
+            // Update protocol data
+            const protocolCounts: { [key: string]: number } = {};
+            data.packets.forEach((packet: PacketLog) => {
+              const protocol = packet.protocol === '6' ? 'TCP' : 
+                              packet.protocol === '17' ? 'UDP' : 
+                              packet.protocol === '1' ? 'ICMP' : 'Other';
+              protocolCounts[protocol] = (protocolCounts[protocol] || 0) + 1;
+            });
+            
+            setProtocolData(Object.entries(protocolCounts).map(([name, value]) => ({ name, value })));
           }
-        } else {
-          newData.unshift({
-            timestamp: now,
-            normal: packet.prediction === 0 ? 1 : 0,
-            intrusion: packet.prediction === 1 ? 1 : 0
+          
+          setIsConnected(true);
+          toast({
+            title: "Connected",
+            description: "Successfully connected to backend",
+            variant: "default",
           });
-        }
-        return newData.slice(0, 10);
-      });
-      
-      // Update protocol data
-      setProtocolData(prev => {
-        const protocol = packet.protocol === '6' ? 'TCP' : 
-                        packet.protocol === '17' ? 'UDP' : 
-                        packet.protocol === '1' ? 'ICMP' : 'Other';
-        
-        const newData = [...prev];
-        const index = newData.findIndex(item => item.name === protocol);
-        if (index !== -1) {
-          newData[index].value += 1;
         } else {
-          newData.push({ name: protocol, value: 1 });
+          throw new Error('Failed to fetch data');
         }
-        return newData;
-      });
+      } catch (error) {
+        console.error('API error:', error);
+        setIsConnected(false);
+        toast({
+          title: "Connection Error",
+          description: "Failed to connect to backend",
+          variant: "destructive",
+        });
+      }
+    };
+    
+    // Initial fetch
+    fetchData();
+    
+    // Set up polling interval
+    const interval = setInterval(fetchData, refreshInterval * 1000);
+    
+        return () => clearInterval(interval);
+  }, [refreshInterval, toast]);
     };
 
     ws.current.onerror = (error) => {
@@ -107,12 +130,8 @@ const Dashboard = () => {
       });
     };
 
-    return () => {
-      if (ws.current) {
-        ws.current.close();
-      }
-    };
-  }, [toast]);
+    return () => clearInterval(interval);
+  }, [refreshInterval, toast]);
 
   // Simulating real-time updates
   const handleRefresh = () => {
@@ -190,9 +209,9 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center">
-                  <div className={`h-3 w-3 rounded-full ${ws.current?.readyState === WebSocket.OPEN ? 'bg-green-500' : 'bg-red-500'} mr-2 animate-pulse`}></div>
-                  <span className={ws.current?.readyState === WebSocket.OPEN ? 'text-green-500' : 'text-red-500'}>
-                    {ws.current?.readyState === WebSocket.OPEN ? 'Connected' : 'Disconnected'}
+                  <div className={`h-3 w-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'} mr-2 animate-pulse`}></div>
+                  <span className={isConnected ? 'text-green-500' : 'text-red-500'}>
+                    {isConnected ? 'Connected' : 'Disconnected'}
                   </span>
                 </div>
               </CardContent>
