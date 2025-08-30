@@ -43,7 +43,8 @@ const Dashboard = () => {
 
   useEffect(() => {
     // Connect to WebSocket
-    ws.current = new WebSocket('ws://localhost:8765');
+    const wsUrl = import.meta.env.VITE_BACKEND_URL || 'ws://localhost:8765';
+    ws.current = new WebSocket(wsUrl);
     
     ws.current.onmessage = (event) => {
       const packet: PacketLog = JSON.parse(event.data);
