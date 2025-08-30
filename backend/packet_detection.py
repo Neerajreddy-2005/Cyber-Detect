@@ -29,7 +29,7 @@ print("🚨 Real-time Network Intrusion Detection Started...")
 
 # ----------------- Flask App Setup -----------------
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["*"], methods=["GET", "POST", "OPTIONS"])
 
 # Global variables for storing recent data
 recent_packets = []
@@ -267,6 +267,7 @@ def home():
 
 @app.route('/api/packets')
 def get_packets():
+    logging.info(f"API request received. Packets: {len(recent_packets)}, Normal: {normal_count}, Intrusion: {intrusion_count}")
     return jsonify({
         "packets": recent_packets[-50:],  # Last 50 packets
         "normal_count": normal_count,
