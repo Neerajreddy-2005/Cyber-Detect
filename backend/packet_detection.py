@@ -7,6 +7,9 @@ import json
 import asyncio
 import websockets
 import threading
+import os
+import random
+import time
 from datetime import datetime
 
 # ----------------- Load Trained Components -----------------
@@ -39,7 +42,9 @@ async def broadcast(message):
         )
 
 async def websocket_server():
-    async with websockets.serve(register, "localhost", 8765):
+    port = int(os.environ.get('PORT', 8765))
+    host = '0.0.0.0'  # Allow external connections for cloud
+    async with websockets.serve(register, host, port):
         await asyncio.Future()  # run forever
 
 # ----------------- Feature Extraction Function -----------------
@@ -109,12 +114,125 @@ def predict_intrusion(pkt):
     asyncio.run(broadcast(json.dumps(log_entry)))
     logging.info(f"Prediction: {label}")
 
+# ----------------- Cloud Detection -----------------
+def is_cloud_environment():
+    """Detect if running in cloud environment"""
+    cloud_indicators = [
+        'RENDER' in os.environ,
+        'HEROKU' in os.environ,
+        'AWS' in os.environ,
+        'GCP' in os.environ,
+        'AZURE' in os.environ,
+        'PORT' in os.environ,  # Render sets this
+    ]
+    return any(cloud_indicators)
+
+# ----------------- Simulated Packet Generator -----------------
+def generate_simulated_packet():
+    """Generate realistic packet data for cloud environment"""
+    # Common IP addresses
+    src_ips = ['192.168.1.100', '10.0.0.50', '172.16.0.25', '192.168.0.10']
+    dst_ips = ['8.8.8.8', '1.1.1.1', '208.67.222.222', '9.9.9.9']
+    
+    # Common ports
+    src_ports = [random.randint(1024, 65535) for _ in range(4)]
+    dst_ports = [80, 443, 22, 53, 8080, 3000, 5000]
+    
+    # Protocols (6=TCP, 17=UDP)
+    protocols = [6, 17]
+    
+    # Generate packet data
+    packet_data = {
+        'src_ip': random.choice(src_ips),
+        'dst_ip': random.choice(dst_ips),
+        'src_port': random.choice(src_ports),
+        'dst_port': random.choice(dst_ports),
+        'protocol': random.choice(protocols),
+        'packet_length': random.randint(64, 1500),
+        'ttl': random.randint(32, 128),
+        'window': random.randint(1024, 65535) if random.choice(protocols) == 6 else 0,
+        'flags': random.randint(0, 63) if random.choice(protocols) == 6 else 0,
+        'ihl': random.randint(5, 15),
+        'frag': random.randint(0, 3)
+    }
+    
+    return packet_data
+
+def simulate_packet_analysis():
+    """Simulate packet analysis for cloud environment"""
+    while True:
+        try:
+            # Generate simulated packet
+            packet_data = generate_simulated_packet()
+            
+            # Create features dictionary
+            features = {
+                'IP_IHL': packet_data['ihl'],
+                'IP_TTL': packet_data['ttl'],
+                'IP_Len': packet_data['packet_length'],
+                'IP_Frag': packet_data['frag'],
+                'Proto': packet_data['protocol'],
+                'Src_Port': packet_data['src_port'],
+                'Dst_Port': packet_data['dst_port'],
+                'Window': packet_data['window'],
+                'Flags': packet_data['flags'],
+                'Pkt_Len': packet_data['packet_length']
+            }
+            
+            # Use existing prediction logic
+            input_features = []
+            for feat in selected_features:
+                val = features.get(feat, 0)
+                input_features.append(val)
+            
+            input_scaled = scaler.transform([input_features])
+            prediction = model.predict(input_scaled)[0]
+            label = "Normal Traffic" if prediction == 0 else "ATTACK"
+            
+            # Create log entry
+            log_entry = {
+                "id": f"{packet_data['src_ip']}-{packet_data['dst_ip']}",
+                "timestamp": datetime.now().strftime("%m-%d %H:%M:%S"),
+                "src_ip": f"{packet_data['src_ip']}-{packet_data['src_port']}",
+                "dst_ip": f"{packet_data['dst_ip']}-{packet_data['dst_port']}",
+                "protocol": str(packet_data['protocol']),
+                "prediction": int(prediction),
+                "label": label,
+                "packet_length": str(packet_data['packet_length']),
+                "ttl": str(packet_data['ttl'])
+            }
+            
+            # Log to file
+            with open("nids_logs.json", "a") as f:
+                f.write(json.dumps(log_entry) + "\n")
+            
+            # Broadcast to WebSocket clients
+            asyncio.run(broadcast(json.dumps(log_entry)))
+            logging.info(f"Simulated Prediction: {label}")
+            
+            # Wait before next packet (simulate real-time)
+            time.sleep(random.uniform(0.5, 2.0))
+            
+        except Exception as e:
+            logging.error(f"Error in packet simulation: {e}")
+            time.sleep(1)
+
 # ----------------- Start Services -----------------
 def start_websocket():
     asyncio.run(websocket_server())
 
 def start_sniffing():
-    sniff(filter="ip", prn=predict_intrusion, store=0)
+    if is_cloud_environment():
+        logging.info("🌐 Running in cloud environment - using simulated packet data")
+        simulate_packet_analysis()
+    else:
+        logging.info("🏠 Running locally - using real packet sniffing")
+        try:
+            sniff(filter="ip", prn=predict_intrusion, store=0)
+        except Exception as e:
+            logging.error(f"Packet sniffing failed: {e}")
+            logging.info("Falling back to simulated data...")
+            simulate_packet_analysis()
 
 if __name__ == "__main__":
     # Start WebSocket server in a separate thread
