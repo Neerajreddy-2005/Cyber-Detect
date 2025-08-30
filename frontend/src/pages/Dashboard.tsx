@@ -118,18 +118,6 @@ const Dashboard = () => {
     // Set up polling interval
     const interval = setInterval(fetchData, refreshInterval * 1000);
     
-        return () => clearInterval(interval);
-  }, [refreshInterval, toast]);
-    };
-
-    ws.current.onerror = (error) => {
-      toast({
-        title: 'Connection Error',
-        description: 'Failed to connect to the network monitoring service',
-        variant: 'destructive'
-      });
-    };
-
     return () => clearInterval(interval);
   }, [refreshInterval, toast]);
 
