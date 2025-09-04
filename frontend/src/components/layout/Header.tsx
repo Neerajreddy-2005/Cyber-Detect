@@ -16,7 +16,7 @@ const Header = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-cyberpulse-darker/80 backdrop-blur-lg border-b border-white/10">
+    <header className="sticky top-0 z-50 bg-cyberdetect-darker/80 backdrop-blur-lg border-b border-white/10">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Logo />
         
@@ -28,8 +28,8 @@ const Header = () => {
               to={item.path}
               className={`font-medium transition-colors ${
                 location.pathname === item.path
-                  ? 'text-cyberpulse-purple'
-                  : 'text-gray-300 hover:text-cyberpulse-purple'
+                  ? 'text-cyberdetect-purple'
+                  : 'text-gray-300 hover:text-cyberdetect-purple'
               }`}
             >
               {item.name}
@@ -48,7 +48,7 @@ const Header = () => {
       
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-cyberpulse-darker border-t border-white/10">
+        <div className="md:hidden bg-cyberdetect-darker border-t border-white/10">
           <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">
             {navItems.map((item) => (
               <Link
@@ -56,8 +56,8 @@ const Header = () => {
                 to={item.path}
                 className={`font-medium transition-colors ${
                   location.pathname === item.path
-                    ? 'text-cyberpulse-purple'
-                    : 'text-gray-300 hover:text-cyberpulse-purple'
+                    ? 'text-cyberdetect-purple'
+                    : 'text-gray-300 hover:text-cyberdetect-purple'
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >

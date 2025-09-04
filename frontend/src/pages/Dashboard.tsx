@@ -35,6 +35,7 @@ const Dashboard = () => {
   const [trafficData, setTrafficData] = useState<Array<{timestamp: string, normal: number, intrusion: number}>>([]);
   const [protocolData, setProtocolData] = useState<Array<{name: string, value: number}>>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const wasConnected = useRef(false);
 
   // Function to handle showing more/less logs
   const toggleShowAllLogs = () => {
@@ -43,7 +44,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     // Poll data from backend API
-    const apiUrl = 'https://cyber-detect.onrender.com/api/packets';
+    const apiUrl = 'http://localhost:5000/api/packets';
     console.log('Connecting to API:', apiUrl);
     
     const fetchData = async () => {
@@ -93,17 +94,22 @@ const Dashboard = () => {
           }
           
           setIsConnected(true);
-          toast({
-            title: "Connected",
-            description: "Successfully connected to backend",
-            variant: "default",
-          });
+          // Only show toast on initial connection, not on every successful API call
+          if (!wasConnected.current) {
+            toast({
+              title: "Connected",
+              description: "Successfully connected to backend",
+              variant: "default",
+            });
+            wasConnected.current = true;
+          }
         } else {
           throw new Error('Failed to fetch data');
         }
       } catch (error) {
         console.error('API error:', error);
         setIsConnected(false);
+        wasConnected.current = false; // Reset the flag when connection is lost
         toast({
           title: "Connection Error",
           description: "Failed to connect to backend",
@@ -155,7 +161,7 @@ const Dashboard = () => {
         <TabsContent value="overview" className="space-y-6">
           {/* Status Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="bg-cyberpulse-darker border-green-800/30">
+            <Card className="bg-cyberdetect-darker border-green-800/30">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-gray-400">Normal Packets</CardTitle>
               </CardHeader>
@@ -167,7 +173,7 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-cyberpulse-darker border-red-800/30">
+            <Card className="bg-cyberdetect-darker border-red-800/30">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-gray-400">Intrusions Detected</CardTitle>
               </CardHeader>
@@ -179,7 +185,7 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-cyberpulse-darker border-blue-800/30">
+            <Card className="bg-cyberdetect-darker border-blue-800/30">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-gray-400">Total Packets</CardTitle>
               </CardHeader>
@@ -191,7 +197,7 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-cyberpulse-darker border-purple-800/30">
+            <Card className="bg-cyberdetect-darker border-purple-800/30">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-gray-400">System Status</CardTitle>
               </CardHeader>
@@ -207,7 +213,7 @@ const Dashboard = () => {
           </div>
 
           {/* Charts */}
-          <Card className="bg-cyberpulse-darker">
+          <Card className="bg-cyberdetect-darker">
             <CardHeader>
               <CardTitle>Traffic Overview</CardTitle>
               <CardDescription>Normal vs. intrusion traffic over time</CardDescription>
@@ -231,7 +237,7 @@ const Dashboard = () => {
           </Card>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="bg-cyberpulse-darker">
+            <Card className="bg-cyberdetect-darker">
               <CardHeader>
                 <CardTitle>Protocol Distribution</CardTitle>
                 <CardDescription>Breakdown by protocol type</CardDescription>
@@ -254,7 +260,7 @@ const Dashboard = () => {
           </div>
 
           {/* Logs Section */}
-          <Card className="bg-cyberpulse-darker">
+          <Card className="bg-cyberdetect-darker">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Network Logs</CardTitle>
@@ -326,7 +332,7 @@ const Dashboard = () => {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
-          <Card className="bg-cyberpulse-darker">
+          <Card className="bg-cyberdetect-darker">
             <CardHeader>
               <CardTitle>Dashboard Settings</CardTitle>
               <CardDescription>Configure your dashboard preferences</CardDescription>

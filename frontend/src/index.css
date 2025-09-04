@@ -43,7 +43,7 @@
   }
 
   body {
-    @apply bg-cyberpulse-dark text-foreground antialiased;
+    @apply bg-cyberdetect-dark text-foreground antialiased;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
   }
   
@@ -52,10 +52,10 @@
   }
   
   .cyber-heading {
-    @apply font-bold bg-clip-text text-transparent bg-cyber-gradient;
+    @apply font-bold bg-clip-text text-transparent bg-cyberdetect-gradient;
   }
   
   .cyber-card {
-    @apply bg-cyberpulse-darker border border-cyberpulse-purple/20 rounded-xl shadow-lg shadow-cyberpulse-purple/10;
+    @apply bg-cyberdetect-darker border border-cyberdetect-purple/20 rounded-xl shadow-lg shadow-cyberdetect-purple/10;
   }
 }

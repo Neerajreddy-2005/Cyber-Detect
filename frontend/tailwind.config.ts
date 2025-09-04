@@ -63,7 +63,7 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				cyberpulse: {
+				cyberdetect: {
 					dark: '#1A1F2C',
 					darker: '#221F26',
 					purple: '#9b87f5',
@@ -106,7 +106,7 @@ export default {
 				'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
 			},
 			backgroundImage: {
-				'cyber-gradient': 'linear-gradient(to right, #9b87f5, #0EA5E9)'
+				'cyberdetect-gradient': 'linear-gradient(to right, #9b87f5, #0EA5E9)'
 			}
 		}
 	},

@@ -7,7 +7,7 @@ const About = () => {
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">About Cyber-Pulse</h1>
+          <h1 className="text-4xl font-bold mb-4">About Cyber-Detect</h1>
           <p className="text-xl text-gray-400">
             Our advanced Network Intrusion Detection System
           </p>
@@ -17,16 +17,16 @@ const About = () => {
           <section>
             <h2 className="text-2xl font-semibold mb-4 cyber-heading">Network Intrusion Detection System (NIDS)</h2>
             <p className="text-gray-300 mb-6">
-              Cyber-Pulse is a real-time Network Intrusion Detection System that uses machine learning to 
+              Cyber-Detect is a real-time Network Intrusion Detection System that uses machine learning to 
               detect and classify network intrusions. The system includes a training pipeline, real-time detection, 
               and a web-based dashboard for monitoring.
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <Card className="bg-cyberpulse-darker border-cyberpulse-purple/20 transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
+              <Card className="bg-cyberdetect-darker border-cyberdetect-purple/20 transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
                 <CardHeader className="pb-3">
-                  <div className="h-10 w-10 rounded-full bg-cyberpulse-purple/10 flex items-center justify-center mb-2">
-                    <Shield className="h-5 w-5 text-cyberpulse-purple" />
+                  <div className="h-10 w-10 rounded-full bg-cyberdetect-purple/10 flex items-center justify-center mb-2">
+                    <Shield className="h-5 w-5 text-cyberdetect-purple" />
                   </div>
                   <CardTitle>Security Focus</CardTitle>
                 </CardHeader>
@@ -37,10 +37,10 @@ const About = () => {
                 </CardContent>
               </Card>
               
-              <Card className="bg-cyberpulse-darker border-cyberpulse-purple/20 transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
+              <Card className="bg-cyberdetect-darker border-cyberdetect-purple/20 transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
                 <CardHeader className="pb-3">
-                  <div className="h-10 w-10 rounded-full bg-cyberpulse-blue/10 flex items-center justify-center mb-2">
-                    <Database className="h-5 w-5 text-cyberpulse-blue" />
+                  <div className="h-10 w-10 rounded-full bg-cyberdetect-blue/10 flex items-center justify-center mb-2">
+                    <Database className="h-5 w-5 text-cyberdetect-blue" />
                   </div>
                   <CardTitle>Machine Learning</CardTitle>
                 </CardHeader>
@@ -55,7 +55,7 @@ const About = () => {
 
           <section>
             <h2 className="text-2xl font-semibold mb-4 cyber-heading">Model Development and Feature Selection</h2>
-            <Card className="bg-cyberpulse-darker border-cyberpulse-purple/20 mb-8 transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
+            <Card className="bg-cyberdetect-darker border-cyberdetect-purple/20 mb-8 transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
               <CardHeader>
                 <CardTitle></CardTitle>
               </CardHeader>
@@ -70,7 +70,7 @@ const About = () => {
 
           <section>
             <h2 className="text-2xl font-semibold mb-4 cyber-heading">Model Performance</h2>
-            <Card className="bg-cyberpulse-darker border-cyberpulse-purple/20 mb-8 transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
+            <Card className="bg-cyberdetect-darker border-cyberdetect-purple/20 mb-8 transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
               <CardHeader>
                 <CardTitle>Performance Metrics</CardTitle>
               </CardHeader>
@@ -149,7 +149,7 @@ const About = () => {
           <section>
             <h2 className="text-2xl font-semibold mb-4 cyber-heading">Technical Requirements</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="bg-cyberpulse-darker border-cyberpulse-purple/20 transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
+              <Card className="bg-cyberdetect-darker border-cyberdetect-purple/20 transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
                 <CardHeader className="pb-3">
                   <CardTitle>System Requirements</CardTitle>
                 </CardHeader>
@@ -163,7 +163,7 @@ const About = () => {
                 </CardContent>
               </Card>
               
-              <Card className="bg-cyberpulse-darker border-cyberpulse-purple/20 transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
+              <Card className="bg-cyberdetect-darker border-cyberdetect-purple/20 transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
                 <CardHeader className="pb-3">
                   <CardTitle>Software Dependencies</CardTitle>
                 </CardHeader>
@@ -182,10 +182,10 @@ const About = () => {
           <section>
             <h2 className="text-2xl font-semibold mb-4 cyber-heading">Dashboard Features</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="bg-cyberpulse-darker border-cyberpulse-purple/20 transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
+              <Card className="bg-cyberdetect-darker border-cyberdetect-purple/20 transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
                 <CardHeader className="pb-3">
-                  <div className="h-10 w-10 rounded-full bg-cyberpulse-orange/10 flex items-center justify-center mb-2">
-                    <Network className="h-5 w-5 text-cyberpulse-orange" />
+                  <div className="h-10 w-10 rounded-full bg-cyberdetect-orange/10 flex items-center justify-center mb-2">
+                    <Network className="h-5 w-5 text-cyberdetect-orange" />
                   </div>
                   <CardTitle>Monitoring Features</CardTitle>
                 </CardHeader>
@@ -199,10 +199,10 @@ const About = () => {
                 </CardContent>
               </Card>
               
-              <Card className="bg-cyberpulse-darker border-cyberpulse-purple/20 transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
+              <Card className="bg-cyberdetect-darker border-cyberdetect-purple/20 transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
                 <CardHeader className="pb-3">
-                  <div className="h-10 w-10 rounded-full bg-cyberpulse-green/10 flex items-center justify-center mb-2">
-                    <BarChart2 className="h-5 w-5 text-cyberpulse-green" />
+                  <div className="h-10 w-10 rounded-full bg-cyberdetect-green/10 flex items-center justify-center mb-2">
+                    <BarChart2 className="h-5 w-5 text-cyberdetect-green" />
                   </div>
                   <CardTitle>Visualization Tools</CardTitle>
                 </CardHeader>

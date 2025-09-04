@@ -46,7 +46,7 @@ const Contact = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
         <div className="lg:col-span-2">
-          <Card className="bg-cyberpulse-darker border-cyberpulse-purple/20">
+          <Card className="bg-cyberdetect-darker border-cyberdetect-purple/20">
             <CardHeader>
               <CardTitle>Send a Message</CardTitle>
               <CardDescription>
@@ -67,7 +67,7 @@ const Contact = () => {
                       value={formData.name}
                       onChange={handleInputChange}
                       required
-                      className="bg-cyberpulse-darker border-gray-700"
+                      className="bg-cyberdetect-darker border-gray-700"
                     />
                   </div>
                   <div className="space-y-2">
@@ -82,7 +82,7 @@ const Contact = () => {
                       value={formData.email}
                       onChange={handleInputChange}
                       required
-                      className="bg-cyberpulse-darker border-gray-700"
+                      className="bg-cyberdetect-darker border-gray-700"
                     />
                   </div>
                 </div>
@@ -90,34 +90,34 @@ const Contact = () => {
                   <label htmlFor="subject" className="text-sm font-medium">
                     Subject
                   </label>
-                  <Input
-                    id="subject"
-                    name="subject"
-                    placeholder="How can we help you?"
-                    value={formData.subject}
-                    onChange={handleInputChange}
-                    required
-                    className="bg-cyberpulse-darker border-gray-700"
-                  />
+                                      <Input
+                      id="subject"
+                      name="subject"
+                      placeholder="How can we help you?"
+                      value={formData.subject}
+                      onChange={handleInputChange}
+                      required
+                      className="bg-cyberdetect-darker border-gray-700"
+                    />
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="message" className="text-sm font-medium">
                     Message
                   </label>
-                  <Textarea
-                    id="message"
-                    name="message"
-                    placeholder="Your message here..."
-                    rows={6}
-                    value={formData.message}
-                    onChange={handleInputChange}
-                    required
-                    className="bg-cyberpulse-darker border-gray-700"
-                  />
+                                      <Textarea
+                      id="message"
+                      name="message"
+                      placeholder="Your message here..."
+                      rows={6}
+                      value={formData.message}
+                      onChange={handleInputChange}
+                      required
+                      className="bg-cyberdetect-darker border-gray-700"
+                    />
                 </div>
               </CardContent>
               <CardFooter>
-                <Button type="submit" className="w-full bg-cyberpulse-purple hover:bg-cyberpulse-purple/90">
+                <Button type="submit" className="w-full bg-cyberdetect-purple hover:bg-cyberdetect-purple/90">
                   <Send className="mr-2 h-4 w-4" />
                   Send Message
                 </Button>
@@ -127,7 +127,7 @@ const Contact = () => {
         </div>
 
         <div>
-          <Card className="bg-cyberpulse-darker border-cyberpulse-purple/20 max-w-sm">
+          <Card className="bg-cyberdetect-darker border-cyberdetect-purple/20 max-w-sm">
             <CardHeader>
               <CardTitle>Contact Information</CardTitle>
               <CardDescription>
@@ -136,7 +136,7 @@ const Contact = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-start">
-                <MapPin className="h-5 w-5 text-cyberpulse-purple mr-3 mt-0.5" />
+                <MapPin className="h-5 w-5 text-cyberdetect-purple mr-3 mt-0.5" />
                 <div>
                   <h3 className="font-medium">Address</h3>
                   <p className="text-gray-400">
@@ -145,7 +145,7 @@ const Contact = () => {
                 </div>
               </div>
               <div className="flex items-start">
-                <Phone className="h-5 w-5 text-cyberpulse-purple mr-3 mt-0.5" />
+                <Phone className="h-5 w-5 text-cyberdetect-purple mr-3 mt-0.5" />
                 <div>
                   <h3 className="font-medium">Phone</h3>
                   <p className="text-gray-400">
@@ -154,7 +154,7 @@ const Contact = () => {
                 </div>
               </div>
               <div className="flex items-start">
-                <Mail className="h-5 w-5 text-cyberpulse-purple mr-3 mt-0.5" />
+                <Mail className="h-5 w-5 text-cyberdetect-purple mr-3 mt-0.5" />
                 <div>
                   <h3 className="font-medium">Email</h3>
                   <p className="text-gray-400">

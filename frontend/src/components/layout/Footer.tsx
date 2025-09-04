@@ -16,10 +16,10 @@ const Footer = () => {
           <div className="text-center md:text-left w-full md:col-start-2 md:justify-self-center md:ml-24">
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><a href="/" className="text-gray-400 hover:text-cyberpulse-purple">Home</a></li>
-              <li><a href="/dashboard" className="text-gray-400 hover:text-cyberpulse-purple">Dashboard</a></li>
-              <li><a href="/about" className="text-gray-400 hover:text-cyberpulse-purple">About</a></li>
-              <li><a href="/feedback" className="text-gray-400 hover:text-cyberpulse-purple">Feedback</a></li>
+              <li><a href="/" className="text-gray-400 hover:text-cyberdetect-purple">Home</a></li>
+              <li><a href="/dashboard" className="text-gray-400 hover:text-cyberdetect-purple">Dashboard</a></li>
+              <li><a href="/about" className="text-gray-400 hover:text-cyberdetect-purple">About</a></li>
+              <li><a href="/feedback" className="text-gray-400 hover:text-cyberdetect-purple">Feedback</a></li>
             </ul>
           </div>
           
@@ -27,15 +27,15 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4">Contact Info</h3>
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-gray-400 justify-center md:justify-start">
-                <MapPin size={18} className="text-cyberpulse-purple" />
+                <MapPin size={18} className="text-cyberdetect-purple" />
                 <span>Hyderabad</span>
               </li>
               <li className="flex items-center gap-2 text-gray-400 justify-center md:justify-start">
-                <Phone size={18} className="text-cyberpulse-purple" />
+                <Phone size={18} className="text-cyberdetect-purple" />
                 <span>+91 9391971961</span>
               </li>
               <li className="flex items-center gap-2 text-gray-400 justify-center md:justify-start">
-                <Mail size={18} className="text-cyberpulse-purple" />
+                <Mail size={18} className="text-cyberdetect-purple" />
                 <span>retvikvarmab@gmail.com</span>
               </li>
             </ul>
@@ -44,11 +44,11 @@ const Footer = () => {
         
         <div className="border-t border-gray-800 mt-12 pt-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} Cyber-Pulse. All rights reserved.
+            © {new Date().getFullYear()} Cyber-Detect. All rights reserved.
           </p>
           <div className="flex space-x-4 mt-4 md:mt-0">
-            <a href="#" className="text-gray-400 hover:text-cyberpulse-purple">Privacy Policy</a>
-            <a href="#" className="text-gray-400 hover:text-cyberpulse-purple">Terms of Service</a>
+            <a href="#" className="text-gray-400 hover:text-cyberdetect-purple">Privacy Policy</a>
+            <a href="#" className="text-gray-400 hover:text-cyberdetect-purple">Terms of Service</a>
           </div>
         </div>
       </div>

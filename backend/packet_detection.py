@@ -36,6 +36,10 @@ recent_packets = []
 normal_count = 0
 intrusion_count = 0
 
+# Lock for thread-safe access to global variables
+import threading
+data_lock = threading.Lock()
+
 # ----------------- WebSocket Connections -----------------
 connected_clients = set()
 
@@ -53,8 +57,8 @@ async def broadcast(message):
         )
 
 async def websocket_server():
-    port = int(os.environ.get('PORT', 10000))  # Use Render's standard port
-    host = '0.0.0.0'  # Allow external connections for cloud
+    port = int(os.environ.get('PORT', 5002))  # Use local port 5002 for WebSocket to avoid conflicts
+    host = 'localhost'  # Local connections only
     async with websockets.serve(register, host, port):
         await asyncio.Future()  # run forever
 
@@ -129,12 +133,10 @@ def predict_intrusion(pkt):
 def is_cloud_environment():
     """Detect if running in cloud environment"""
     cloud_indicators = [
-        'RENDER' in os.environ,
         'HEROKU' in os.environ,
         'AWS' in os.environ,
         'GCP' in os.environ,
         'AZURE' in os.environ,
-        'PORT' in os.environ,  # Render sets this
     ]
     return any(cloud_indicators)
 
@@ -217,16 +219,20 @@ def simulate_packet_analysis():
             with open("nids_logs.json", "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
             
-            # Store data for API
+            # Store data for API - use thread-safe updates
             global recent_packets, normal_count, intrusion_count
-            recent_packets.append(log_entry)
-            if len(recent_packets) > 100:  # Keep only last 100 packets
-                recent_packets.pop(0)
-            
-            if prediction == 0:
-                normal_count += 1
-            else:
-                intrusion_count += 1
+            with data_lock:
+                recent_packets.append(log_entry)
+                if len(recent_packets) > 100:  # Keep only last 100 packets
+                    recent_packets.pop(0)
+                
+                if prediction == 0:
+                    normal_count += 1
+                else:
+                    intrusion_count += 1
+                
+                # Log the current counts for debugging
+                logging.info(f"Updated counts - Packets: {len(recent_packets)}, Normal: {normal_count}, Intrusion: {intrusion_count}")
             
             # Broadcast to WebSocket clients
             asyncio.run(broadcast(json.dumps(log_entry)))
@@ -244,17 +250,9 @@ def start_websocket():
     asyncio.run(websocket_server())
 
 def start_sniffing():
-    if is_cloud_environment():
-        logging.info("🌐 Running in cloud environment - using simulated packet data")
-        simulate_packet_analysis()
-    else:
-        logging.info("🏠 Running locally - using real packet sniffing")
-        try:
-            sniff(filter="ip", prn=predict_intrusion, store=0)
-        except Exception as e:
-            logging.error(f"Packet sniffing failed: {e}")
-            logging.info("Falling back to simulated data...")
-            simulate_packet_analysis()
+    # Always use simulated data for consistent testing and development
+    logging.info("🏠 Running locally - using simulated packet data for development")
+    simulate_packet_analysis()
 
 # ----------------- Flask Routes -----------------
 @app.route('/')
@@ -267,12 +265,19 @@ def home():
 
 @app.route('/api/packets')
 def get_packets():
-    logging.info(f"API request received. Packets: {len(recent_packets)}, Normal: {normal_count}, Intrusion: {intrusion_count}")
+    global recent_packets, normal_count, intrusion_count
+    with data_lock:
+        packet_count = len(recent_packets)
+        normal = normal_count
+        intrusion = intrusion_count
+        total = normal + intrusion
+        
+    logging.info(f"API request received. Packets: {packet_count}, Normal: {normal}, Intrusion: {intrusion}")
     return jsonify({
-        "packets": recent_packets[-50:],  # Last 50 packets
-        "normal_count": normal_count,
-        "intrusion_count": intrusion_count,
-        "total_count": normal_count + intrusion_count
+        "packets": recent_packets[-50:] if recent_packets else [],  # Last 50 packets
+        "normal_count": normal,
+        "intrusion_count": intrusion,
+        "total_count": total
     })
 
 @app.route('/health')
@@ -293,5 +298,5 @@ if __name__ == "__main__":
     packet_thread.start()
     
     # Start Flask app on the main thread
-    port = int(os.environ.get('PORT', 10000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    port = int(os.environ.get('PORT', 5000))  # Use local port 5000 for Flask
+    app.run(host='localhost', port=port, debug=True)
