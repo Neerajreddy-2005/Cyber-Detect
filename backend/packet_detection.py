@@ -7,12 +7,7 @@ import json
 import asyncio
 import websockets
 import threading
-import os
-import random
-import time
 from datetime import datetime
-from flask import Flask, jsonify
-from flask_cors import CORS
 
 # ----------------- Load Trained Components -----------------
 model = joblib.load("nids_xgboost_model3.pkl")
@@ -26,19 +21,6 @@ logging.basicConfig(
 )
 
 print("🚨 Real-time Network Intrusion Detection Started...")
-
-# ----------------- Flask App Setup -----------------
-app = Flask(__name__)
-CORS(app, origins=["*"], methods=["GET", "POST", "OPTIONS"])
-
-# Global variables for storing recent data
-recent_packets = []
-normal_count = 0
-intrusion_count = 0
-
-# Lock for thread-safe access to global variables
-import threading
-data_lock = threading.Lock()
 
 # ----------------- WebSocket Connections -----------------
 connected_clients = set()
@@ -57,9 +39,7 @@ async def broadcast(message):
         )
 
 async def websocket_server():
-    port = int(os.environ.get('PORT', 5002))  # Use local port 5002 for WebSocket to avoid conflicts
-    host = 'localhost'  # Local connections only
-    async with websockets.serve(register, host, port):
+    async with websockets.serve(register, "localhost", 8765):
         await asyncio.Future()  # run forever
 
 # ----------------- Feature Extraction Function -----------------
@@ -129,174 +109,17 @@ def predict_intrusion(pkt):
     asyncio.run(broadcast(json.dumps(log_entry)))
     logging.info(f"Prediction: {label}")
 
-# ----------------- Cloud Detection -----------------
-def is_cloud_environment():
-    """Detect if running in cloud environment"""
-    cloud_indicators = [
-        'HEROKU' in os.environ,
-        'AWS' in os.environ,
-        'GCP' in os.environ,
-        'AZURE' in os.environ,
-    ]
-    return any(cloud_indicators)
-
-# ----------------- Simulated Packet Generator -----------------
-def generate_simulated_packet():
-    """Generate realistic packet data for cloud environment"""
-    # Common IP addresses
-    src_ips = ['192.168.1.100', '10.0.0.50', '172.16.0.25', '192.168.0.10']
-    dst_ips = ['8.8.8.8', '1.1.1.1', '208.67.222.222', '9.9.9.9']
-    
-    # Common ports
-    src_ports = [random.randint(1024, 65535) for _ in range(4)]
-    dst_ports = [80, 443, 22, 53, 8080, 3000, 5000]
-    
-    # Protocols (6=TCP, 17=UDP)
-    protocols = [6, 17]
-    
-    # Generate packet data
-    packet_data = {
-        'src_ip': random.choice(src_ips),
-        'dst_ip': random.choice(dst_ips),
-        'src_port': random.choice(src_ports),
-        'dst_port': random.choice(dst_ports),
-        'protocol': random.choice(protocols),
-        'packet_length': random.randint(64, 1500),
-        'ttl': random.randint(32, 128),
-        'window': random.randint(1024, 65535) if random.choice(protocols) == 6 else 0,
-        'flags': random.randint(0, 63) if random.choice(protocols) == 6 else 0,
-        'ihl': random.randint(5, 15),
-        'frag': random.randint(0, 3)
-    }
-    
-    return packet_data
-
-def simulate_packet_analysis():
-    """Simulate packet analysis for cloud environment"""
-    while True:
-        try:
-            # Generate simulated packet
-            packet_data = generate_simulated_packet()
-            
-            # Create features dictionary
-            features = {
-                'IP_IHL': packet_data['ihl'],
-                'IP_TTL': packet_data['ttl'],
-                'IP_Len': packet_data['packet_length'],
-                'IP_Frag': packet_data['frag'],
-                'Proto': packet_data['protocol'],
-                'Src_Port': packet_data['src_port'],
-                'Dst_Port': packet_data['dst_port'],
-                'Window': packet_data['window'],
-                'Flags': packet_data['flags'],
-                'Pkt_Len': packet_data['packet_length']
-            }
-            
-            # Use existing prediction logic
-            input_features = []
-            for feat in selected_features:
-                val = features.get(feat, 0)
-                input_features.append(val)
-            
-            input_scaled = scaler.transform([input_features])
-            prediction = model.predict(input_scaled)[0]
-            label = "Normal Traffic" if prediction == 0 else "ATTACK"
-            
-            # Create log entry
-            log_entry = {
-                "id": f"{packet_data['src_ip']}-{packet_data['dst_ip']}",
-                "timestamp": datetime.now().strftime("%m-%d %H:%M:%S"),
-                "src_ip": f"{packet_data['src_ip']}-{packet_data['src_port']}",
-                "dst_ip": f"{packet_data['dst_ip']}-{packet_data['dst_port']}",
-                "protocol": str(packet_data['protocol']),
-                "prediction": int(prediction),
-                "label": label,
-                "packet_length": str(packet_data['packet_length']),
-                "ttl": str(packet_data['ttl'])
-            }
-            
-            # Log to file
-            with open("nids_logs.json", "a") as f:
-                f.write(json.dumps(log_entry) + "\n")
-            
-            # Store data for API - use thread-safe updates
-            global recent_packets, normal_count, intrusion_count
-            with data_lock:
-                recent_packets.append(log_entry)
-                if len(recent_packets) > 100:  # Keep only last 100 packets
-                    recent_packets.pop(0)
-                
-                if prediction == 0:
-                    normal_count += 1
-                else:
-                    intrusion_count += 1
-                
-                # Log the current counts for debugging
-                logging.info(f"Updated counts - Packets: {len(recent_packets)}, Normal: {normal_count}, Intrusion: {intrusion_count}")
-            
-            # Broadcast to WebSocket clients
-            asyncio.run(broadcast(json.dumps(log_entry)))
-            logging.info(f"Simulated Prediction: {label}")
-            
-            # Wait before next packet (simulate real-time)
-            time.sleep(random.uniform(0.5, 2.0))
-            
-        except Exception as e:
-            logging.error(f"Error in packet simulation: {e}")
-            time.sleep(1)
-
 # ----------------- Start Services -----------------
 def start_websocket():
     asyncio.run(websocket_server())
 
 def start_sniffing():
-    # Always use simulated data for consistent testing and development
-    logging.info("🏠 Running locally - using simulated packet data for development")
-    simulate_packet_analysis()
-
-# ----------------- Flask Routes -----------------
-@app.route('/')
-def home():
-    return jsonify({
-        "message": "Cyber-Detect Backend API",
-        "status": "running",
-        "timestamp": datetime.now().isoformat()
-    })
-
-@app.route('/api/packets')
-def get_packets():
-    global recent_packets, normal_count, intrusion_count
-    with data_lock:
-        packet_count = len(recent_packets)
-        normal = normal_count
-        intrusion = intrusion_count
-        total = normal + intrusion
-        
-    logging.info(f"API request received. Packets: {packet_count}, Normal: {normal}, Intrusion: {intrusion}")
-    return jsonify({
-        "packets": recent_packets[-50:] if recent_packets else [],  # Last 50 packets
-        "normal_count": normal,
-        "intrusion_count": intrusion,
-        "total_count": total
-    })
-
-@app.route('/health')
-def health():
-    return jsonify({
-        "status": "healthy",
-        "model_loaded": model is not None,
-        "scaler_loaded": scaler is not None
-    })
+    sniff(filter="ip", prn=predict_intrusion, store=0)
 
 if __name__ == "__main__":
     # Start WebSocket server in a separate thread
-    ws_thread = threading.Thread(target=start_websocket, daemon=True)
+    ws_thread = threading.Thread(target=start_websocket)
     ws_thread.start()
     
-    # Start packet analysis in a separate thread
-    packet_thread = threading.Thread(target=start_sniffing, daemon=True)
-    packet_thread.start()
-    
-    # Start Flask app on the main thread
-    port = int(os.environ.get('PORT', 5000))  # Use local port 5000 for Flask
-    app.run(host='localhost', port=port, debug=True)
+    # Start packet sniffing in the main thread
+    start_sniffing()
