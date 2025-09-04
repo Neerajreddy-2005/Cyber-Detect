@@ -287,9 +287,6 @@ cd backend
 python packet_detection.py
 ```
 
-### Docker Deployment (Optional)
-The frontend includes a Dockerfile for containerized deployment.
-
 ## 🛠️ Troubleshooting
 
 ### Common Issues
@@ -310,27 +307,9 @@ The frontend includes a Dockerfile for containerized deployment.
    - Check firewall settings
    - Verify port 8765 is not blocked
 
-
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
 ## 📝 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🆘 Support
-
-For issues and questions:
-1. Check the troubleshooting section above
-2. Review the existing documentation
-3. Check the code comments
-4. Create an issue in the repository
 
 ## 🔮 Future Enhancements
 
